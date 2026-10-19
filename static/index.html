@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aspergillus niger Enzyme Activity Predictor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="blob-bg blob-1"></div>
+    <div class="blob-bg blob-2"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 2v7.31"></path>
+                        <path d="M14 9.3V1.99"></path>
+                        <path d="M8.5 2h7"></path>
+                        <path d="M14 9.3a6.5 6.5 0 1 1-4 0"></path>
+                        <path d="M5.52 16h12.96"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1>Aspergillus niger <span>Enzyme Intelligence</span></h1>
+                    <p class="subtitle">Bayesian Gaussian Process Regression • Fermentation Bioprocess Optimization</p>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="badge model-badge"><span class="pulse-dot"></span> Production GPR (R² = 0.299)</span>
+                <span class="badge validation-badge">5x5 Repeated K-Fold</span>
+            </div>
+        </header>
+
+        <!-- Presets Ribbon -->
+        <section class="presets-section">
+            <div class="presets-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                Quick Benchmark Presets:
+            </div>
+            <div class="presets-list" id="presetsList">
+                <!-- Dynamically rendered presets -->
+            </div>
+        </section>
+
+        <!-- Main Workspace Grid -->
+        <main class="workspace-grid">
+            <!-- Left: Parameter Controls -->
+            <section class="card input-card">
+                <div class="card-header">
+                    <h2>Bioprocess Parameters</h2>
+                    <span class="step-tag">Input Formulation</span>
+                </div>
+
+                <form id="predictionForm" onsubmit="event.preventDefault(); handlePredict();">
+                    <!-- Strain Selector -->
+                    <div class="form-group">
+                        <label class="field-label" for="strainSelect">
+                            <span>Fungal Strain Lineage</span>
+                            <span class="field-hint">A. niger isolate</span>
+                        </label>
+                        <div class="strain-selector" id="strainSelector">
+                            <button type="button" class="pill-btn" data-value="2" onclick="selectStrain('2')">Strain 2</button>
+                            <button type="button" class="pill-btn active" data-value="4" onclick="selectStrain('4')">Strain 4</button>
+                            <button type="button" class="pill-btn" data-value="12" onclick="selectStrain('12')">Strain 12</button>
+                            <button type="button" class="pill-btn" data-value="35" onclick="selectStrain('35')">Strain 35</button>
+                        </div>
+                        <input type="hidden" id="strainInput" value="4">
+                    </div>
+
+                    <!-- Substrate Selector -->
+                    <div class="form-group">
+                        <label class="field-label">
+                            <span>Carbon / Agro-Biomass Substrate</span>
+                            <span class="field-hint">Solid-state inducer</span>
+                        </label>
+                        <div class="substrate-grid" id="substrateGrid">
+                            <!-- Injected by JS -->
+                        </div>
+                        <input type="hidden" id="substrateInput" value="orange peel">
+                    </div>
+
+                    <!-- Numerical Sliders -->
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label for="phSlider">Medium pH</label>
+                            <span class="slider-readout" id="phVal">5.5</span>
+                        </div>
+                        <input type="range" id="phSlider" min="4.0" max="7.0" step="0.1" value="5.5" oninput="updatePh(this.value)">
+                        <div class="slider-ticks">
+                            <span>4.0 (Acidic)</span>
+                            <span class="highlight-tick">5.0-5.5 (Optimal)</span>
+                            <span>7.0 (Neutral)</span>
+                        </div>
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label for="timeSlider">Fermentation Duration</label>
+                            <span class="slider-readout" id="timeVal">5 days</span>
+                        </div>
+                        <input type="range" id="timeSlider" min="4" max="7" step="1" value="5" oninput="updateTime(this.value)">
+                        <div class="slider-ticks">
+                            <span>4 days (Early)</span>
+                            <span>5 days</span>
+                            <span>6 days</span>
+                            <span>7 days (Late)</span>
+                        </div>
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label for="tempSlider">Cultivation Temperature</label>
+                            <span class="slider-readout" id="tempVal">28.0 °C</span>
+                        </div>
+                        <input type="range" id="tempSlider" min="20.0" max="75.0" step="0.5" value="28.0" oninput="updateTemp(this.value)">
+                        <div class="slider-ticks">
+                            <span>20°C</span>
+                            <span class="highlight-tick">28-35°C (Physiological)</span>
+                            <span class="danger-tick">≥65°C (Denaturation)</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="predict-button" id="predictBtn">
+                        <span class="btn-icon">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        </span>
+                        <span>Predict Enzyme Activity</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Right: Prediction Results & Response Curve -->
+            <section class="card output-card">
+                <div class="card-header">
+                    <h2>Predictive Inference & Analysis</h2>
+                    <span id="statusBadge" class="status-badge status-optimal">Ready</span>
+                </div>
+
+                <!-- Primary Result Display -->
+                <div class="result-hero">
+                    <div class="hero-header">Predicted Enzyme Activity</div>
+                    <div class="hero-number-wrap">
+                        <span class="hero-number" id="predActivityNumber">--</span>
+                        <span class="hero-unit">U/mL</span>
+                    </div>
+
+                    <!-- Uncertainty / Credible Interval Bar -->
+                    <div class="uncertainty-box">
+                        <div class="ci-header">
+                            <span>95% Bayesian Credible Interval</span>
+                            <span class="ci-bounds" id="ciBoundsText">[-- to -- U/mL]</span>
+                        </div>
+                        <div class="ci-bar-wrapper">
+                            <div class="ci-bar" id="ciBar"></div>
+                            <div class="ci-marker" id="ciMarker"></div>
+                        </div>
+                        <div class="ci-metrics">
+                            <span>Std Error (σ): <strong id="stdErrText">--</strong></span>
+                            <span>Inference Confidence: <strong>95%</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biochemical Insight Callout -->
+                <div class="biotech-alert" id="biotechAlert">
+                    <div class="alert-icon" id="alertIcon">💡</div>
+                    <div class="alert-content">
+                        <h4 id="alertTitle">Bioprocess Insights</h4>
+                        <p id="alertDescription">Select parameters on the left and click "Predict Enzyme Activity" to run model inference.</p>
+                    </div>
+                </div>
+
+                <!-- Interactive Temperature Response Canvas -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Temperature Sensitivity Profile</h3>
+                        <span class="chart-legend">
+                            <span class="legend-dot mean-dot"></span> Mean Response
+                            <span class="legend-dot ci-dot"></span> 95% Band
+                            <span class="legend-dot current-dot"></span> Current Input
+                        </span>
+                    </div>
+                    <canvas id="tempChart" width="560" height="210"></canvas>
+                </div>
+            </section>
+        </main>
+
+        <!-- Experiment History Table -->
+        <section class="card history-card">
+            <div class="card-header">
+                <div class="history-title-group">
+                    <h2>Experiment Simulation Log</h2>
+                    <span class="history-count" id="historyCount">0 runs recorded</span>
+                </div>
+                <div class="history-actions">
+                    <button class="btn-subtle" onclick="exportHistoryCSV()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Export CSV
+                    </button>
+                    <button class="btn-subtle" onclick="clearHistory()">Clear</button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="history-table" id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Strain</th>
+                            <th>Substrate</th>
+                            <th>pH</th>
+                            <th>Duration</th>
+                            <th>Temp (°C)</th>
+                            <th>Predicted (U/mL)</th>
+                            <th>95% Interval</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr class="empty-row">
+                            <td colspan="9">No predictions run yet. Adjust parameters above and test your first fermentation run.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Aspergillus niger Machine Learning Research Lab • Powered by Gaussian Process Regression & scikit-learn</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
