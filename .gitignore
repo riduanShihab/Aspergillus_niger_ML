@@ -1,2 +1,5 @@
 /asergillus niger final.csv
 /asergillus niger final_raw.csv
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
